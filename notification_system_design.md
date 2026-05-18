@@ -140,3 +140,42 @@ Log("frontend", "error", "api", "Failed to fetch", { error, endpoint })
 - Bearer token in Authorization header
 - Admin/Moderator: Create, Update, Delete
 - Users: View, Read, Count
+
+---
+
+# Stage 3: SQL Query Optimization
+
+**Problem:** Original query stores notifications per student—50K students × 5M notifications = massive duplication, causes full table scans.
+
+**1. Not accurate:** Violates normalization.
+
+**2. Why slow:** Full table scan of 5M rows, inefficient sorting in memory.
+
+**3. Solution:** Normalize into 3 tables:
+```sql
+students | notifications | notification_recipients(student_id, notification_id, is_read)
+```
+
+**4. Improved query:**
+```sql
+SELECT n.id, n.title, n.created_at FROM notification_recipients nr
+JOIN notifications n ON n.id = nr.notification_id
+WHERE nr.student_id = 1042 AND nr.is_read = false
+ORDER BY n.created_at ASC;
+```
+
+**5. Cost:** Without index O(N) ~100ms+; with composite index O(log N + K) ~1-5ms.
+
+**6. Indexes (not every column—wastes storage & slows writes):**
+```sql
+CREATE INDEX idx_recipients_student_read ON notification_recipients(student_id, is_read, notification_id);
+CREATE INDEX idx_notifications_type_created ON notifications(notification_type, created_at);
+```
+
+**7. Placement in last 7 days:**
+```sql
+SELECT DISTINCT s.id, s.name, s.email FROM students s
+JOIN notification_recipients nr ON nr.student_id = s.id
+JOIN notifications n ON n.id = nr.notification_id
+WHERE n.notification_type = 'placement' AND n.created_at >= NOW() - INTERVAL '7 days';
+```
