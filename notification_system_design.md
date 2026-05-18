@@ -179,3 +179,42 @@ JOIN notification_recipients nr ON nr.student_id = s.id
 JOIN notifications n ON n.id = nr.notification_id
 WHERE n.notification_type = 'placement' AND n.created_at >= NOW() - INTERVAL '7 days';
 ```
+
+---
+
+# Stage 4: Performance Optimization (Caching & Real-Time)
+
+**Problem:** Every page load fetches all notifications, overwhelming the database and degrading UX.
+
+## 8 Optimization Strategies
+
+| Strategy | How It Helps | Tradeoff |
+|----------|-------------|----------|
+| **1. Client-side caching** | Avoid re-fetching same data on page revisit | Stale data risk; requires invalidation logic |
+| **2. Redis server cache** | Cache frequent queries (unread counts, recent notifications) | Additional infra; cache invalidation complexity |
+| **3. Pagination/infinite scroll** | Fetch only 20 notifications per request instead of all | UX requires scroll; network overhead per page |
+| **4. ETag/Last-Modified** | Return 304 Not Modified for unchanged data; reduce payload | Server must track versions; client logic needed |
+| **5. Separate unread count API** | Quick unread count without fetching full notifications | Extra API call; eventual consistency |
+| **6. WebSocket/SSE** | Real-time push instead of repeated polling | Persistent connection overhead; graceful fallback needed |
+| **7. Background refresh** | Load notifications async after page render | User sees stale data initially; async complexity |
+| **8. Database indexing** | Fast query execution (covered in Stage 3) | Storage overhead; index maintenance |
+
+## Recommended Approach
+
+**Combine:** Paginated APIs + Redis cache + client-side cache + WebSocket + background refresh + DB indexes
+
+**Implementation:**
+```
+1. API returns 20 notifications/page (pagination)
+2. Cache unread count in Redis (5 min TTL)
+3. Store fetched pages in localStorage (client)
+4. Connect WebSocket for new notifications (real-time push)
+5. Refresh unread count in background (every 2 min)
+6. Composite indexes on (student_id, is_read), (created_at)
+```
+
+**Result:** 
+- ~90% reduction in DB queries
+- Sub-100ms load time
+- Real-time updates
+- Minimal stale data
