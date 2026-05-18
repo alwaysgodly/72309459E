@@ -101,3 +101,16 @@ ON notification_recipients(student_id, is_read, notification_id);
 ```
 
 **Result:** 30-second processing, zero duplicates, safe retries, failure isolation
+
+# Stage 6
+
+Implemented a priority inbox in `notification_app_be/priorityInbox.js`.
+
+The implementation fetches notifications from the protected notification API and ranks them using notification type weight and recency.
+
+Priority order:
+1. Placement
+2. Result
+3. Event
+
+The top 10 notifications are selected by sorting notifications based on the calculated priority score. The implementation uses the reusable logging middleware for API fetching and processing logs.
