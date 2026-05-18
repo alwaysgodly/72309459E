@@ -1,122 +1,131 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from 'react';
+import {
+  AppBar,
+  Toolbar,
+  Tabs,
+  Tab,
+  Box,
+  Container,
+  CssBaseline,
+  ThemeProvider,
+  createTheme,
+} from '@mui/material';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
+import AllNotifications from './pages/AllNotifications';
+import PriorityNotifications from './pages/PriorityNotifications';
+import { Log } from "../../logging_middleware/frontendLogger";
 
-function App() {
-  const [count, setCount] = useState(0)
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#f57c00',
+    },
+  },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+  },
+});
+
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`tabpanel-${index}`}
+      aria-labelledby={`tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box>{children}</Box>}
+    </div>
+  );
 }
 
-export default App
+function App() {
+  const [tabValue, setTabValue] = useState(0);
+
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+    Log("frontend", "info", "page", "App loaded");
+  };
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <AppBar position="static" sx={{ mb: 2 }}>
+          <Toolbar>
+            <NotificationsIcon sx={{ mr: 2, fontSize: 28 }} />
+            <Box sx={{ flex: 1 }}>
+              <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 600 }}>
+                Campus Notifications
+              </h1>
+            </Box>
+          </Toolbar>
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            sx={{
+              backgroundColor: 'rgba(0, 0, 0, 0.1)',
+              '& .MuiTabs-indicator': { backgroundColor: '#fff' },
+            }}
+          >
+            <Tab
+              icon={<NotificationsIcon />}
+              label="All Notifications"
+              id="tab-0"
+              aria-controls="tabpanel-0"
+              iconPosition="start"
+            />
+            <Tab
+              icon={<PriorityHighIcon />}
+              label="Priority"
+              id="tab-1"
+              aria-controls="tabpanel-1"
+              iconPosition="start"
+            />
+          </Tabs>
+        </AppBar>
+
+        <Container
+          maxWidth="lg"
+          sx={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            py: 2,
+          }}
+        >
+          <TabPanel value={tabValue} index={0}>
+            <AllNotifications />
+          </TabPanel>
+          <TabPanel value={tabValue} index={1}>
+            <PriorityNotifications />
+          </TabPanel>
+        </Container>
+
+        <Box
+          component="footer"
+          sx={{
+            backgroundColor: '#f5f5f5',
+            py: 2,
+            textAlign: 'center',
+            mt: 'auto',
+            borderTop: '1px solid #e0e0e0',
+          }}
+        >
+          <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>
+            © 2024 Campus Notification Platform
+          </p>
+        </Box>
+      </Box>
+    </ThemeProvider>
+  );
+}
+
+export default App;

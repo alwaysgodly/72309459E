@@ -1,4 +1,4 @@
-const LOG_API_URL = "http://4.224.186.213/evaluation-service/logs";
+const LOG_API_URL = "/api/evaluation-service/logs";
 
 export async function Log(stack, level, packageName, message) {
   try {
@@ -11,8 +11,8 @@ export async function Log(stack, level, packageName, message) {
     const response = await fetch(LOG_API_URL, {
       method: "POST",
       headers: {
+        "Authorization": `Bearer ${import.meta.env.VITE_ACCESS_TOKEN}`,
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         stack,

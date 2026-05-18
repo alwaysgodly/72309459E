@@ -1,20 +1,33 @@
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
+/* App Styles - Material UI handles most styling */
 
-  &:hover {
-    border-color: var(--accent-border);
+/* Animation for page transitions */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
+
+/* Notification card animation */
+.notification-card {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Responsive utilities */
+@media (max-width: 600px) {
+  /* Mobile styles are handled by Material UI */
+}
+
+@media (min-width: 601px) and (max-width: 960px) {
+  /* Tablet styles are handled by Material UI */
+}
+
+@media (min-width: 961px) {
+  /* Desktop styles are handled by Material UI */
 }
 
 .hero {
